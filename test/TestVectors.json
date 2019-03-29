@@ -1,0 +1,58 @@
+[
+	{
+		"Name":           "Test vector 1",
+		"Key":            "0704010e0b0815121f1c192623202d2a3734313e3b3845424f4c495653505d5a",
+		"Nonce":          "100f0e0d0c0b0a0908070605040302",
+		"AssociatedData": null,
+		"Message":        null,
+		"Sealed":         "634bee5902050f86b0db27e0f65b0f57"
+	},
+	{
+		"Name":           "Test vector 2",
+		"Key":            "0704010e0b0815121f1c192623202d2a3734313e3b3845424f4c495653505d5a",
+		"Nonce":          "100f0e0d0c0b0a0908070605040302",
+		"AssociatedData": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+		"Message":        null,
+		"Sealed":         "64e34124a47b44c7d8e877ad113d6299"
+	},
+	{
+		"Name":           "Test vector 3",
+		"Key":            "0704010e0b0815121f1c192623202d2a3734313e3b3845424f4c495653505d5a",
+		"Nonce":          "100f0e0d0c0b0a0908070605040302",
+		"AssociatedData": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20",
+		"Message":        null,
+		"Sealed":         "979e012954ccf163837137f3eeb405be"
+	},
+	{
+		"Name":           "Test vector 4",
+		"Key":            "0704010e0b0815121f1c192623202d2a3734313e3b3845424f4c495653505d5a",
+		"Nonce":          "100f0e0d0c0b0a0908070605040302",
+		"AssociatedData": null,
+		"Message":        "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f",
+		"Sealed":         "99bdd0382c1f2af08bef2636279c3c9b747c7eaea80d87f2f5437f068cdc1165fc85f698fb1d058c18c78d7f9097ec14"
+	},
+	{
+		"Name":           "Test vector 5",
+		"Key":            "0704010e0b0815121f1c192623202d2a3734313e3b3845424f4c495653505d5a",
+		"Nonce":          "100f0e0d0c0b0a0908070605040302",
+		"AssociatedData": null,
+		"Message":        "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30",
+		"Sealed":         "11b83586b6d988f83069adfc4291af243910c095657e4bb4340b95b77b1ed7a98d6ab5e48c403623193b3e40dbf12616c5"
+	},
+	{
+		"Name":           "Test vector 6",
+		"Key":            "0704010e0b0815121f1c192623202d2a3734313e3b3845424f4c495653505d5a",
+		"Nonce":          "100f0e0d0c0b0a0908070605040302",
+		"AssociatedData": "000102030405060708090a0b0c0d0e0f",
+		"Message":        "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f",
+		"Sealed":         "8c8de55536ac17ab4f9f06778f291f67d2dafc679374049f06950ff065db4cc5fe958f9e761478a462d7d89c64716cde"
+	},
+	{
+		"Name":           "Test vector 7",
+		"Key":            "0704010e0b0815121f1c192623202d2a3734313e3b3845424f4c495653505d5a",
+		"Nonce":          "100f0e0d0c0b0a0908070605040302",
+		"AssociatedData": "000102030405060708090a0b0c0d0e0f10",
+		"Message":        "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30",
+		"Sealed":         "2717f4821993ffe06ac8ef3e09b285c22500a9bb2bcc0672fcd5a1c46cff676d2cc83f2f53fe04ced2849bffb471b206d6"
+	}
+]

@@ -1,0 +1,32 @@
+{
+  "name": "deoxysii",
+  "version": "0.0.1",
+  "description": "Deoxys-II-256-128",
+  "main": "./deoxysii",
+  "scripts": {
+    "bench": "node ./bench/bench.js",
+    "test": "mocha",
+    "lint": "eslint *.js ./test ./bench"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oasislabs/deoxysii.js.git"
+  },
+  "author": "Oasis Labs Inc. <info@oasislabs.com>",
+  "devDependencies": {
+    "@babel/core": "^7.3.3",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.5",
+    "benchmark": "^2.1.4",
+    "chai": "*",
+    "eslint": "^5.14.0",
+    "microtime": "^3.0.0",
+    "mocha": "*",
+    "webpack": "^4.29.4",
+    "webpack-command": "^0.4.2"
+  },
+  "dependencies": {
+    "aes": "git+ssh://git@github.com/oasislabs/aes.js.git",
+    "uint32": "^0.2.1"
+  }
+}
