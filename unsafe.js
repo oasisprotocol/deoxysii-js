@@ -293,10 +293,11 @@ const te3 = new Uint32Array([
 const andMask = uint32.fromBytesBigEndian(0x00, 0x00, 0x00, 0xff);
 
 function aesencVartime(s0, s1, s2, s3, roundKey) {
-	const rk0 = roundKey.readUInt32BE(0);
-	const rk1 = roundKey.readUInt32BE(4);
-	const rk2 = roundKey.readUInt32BE(8);
-	const rk3 = roundKey.readUInt32BE(12);
+	const roundView = new DataView(roundKey.buffer);
+	const rk0 = roundView.getUint32(0, false);
+	const rk1 = roundView.getUint32(4, false);
+	const rk2 = roundView.getUint32(8, false);
+	const rk3 = roundView.getUint32(12, false);
 
 	const t0 = uint32.xor(
 		te0[uint32.and(uint32.shiftRight(s0, 24), andMask)],

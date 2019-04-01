@@ -27,10 +27,10 @@ var deoxysii = require('../deoxysii');
 function testVectorsUnofficial(useUnsafeVartime) {
 	const vectors = require('./Deoxys-II-256-128.json');
 
-	let key = Buffer.from(vectors.Key, 'base64');
-	let nonce = Buffer.from(vectors.Nonce, 'base64');
-	let aad = Buffer.from(vectors.AADData, 'base64');
-	let msg = Buffer.from(vectors.MsgData, 'base64');
+	let key = new Uint8Array(Buffer.from(vectors.Key, 'base64'));
+	let nonce = new Uint8Array(Buffer.from(vectors.Nonce, 'base64'));
+	let aad = new Uint8Array(Buffer.from(vectors.AADData, 'base64'));
+	let msg = new Uint8Array(Buffer.from(vectors.MsgData, 'base64'));
 
 	let aead = new deoxysii.AEAD(key, useUnsafeVartime);
 
@@ -42,16 +42,16 @@ function testVectorsUnofficial(useUnsafeVartime) {
 
 		let ciphertext = aead.encrypt(nonce, m, a);
 
-		const vecCt = Buffer.from(vector.Ciphertext, 'base64');
-		const vecTag = Buffer.from(vector.Tag, 'base64');
+		const vecCt = new Uint8Array(Buffer.from(vector.Ciphertext, 'base64'));
+		const vecTag = new Uint8Array(Buffer.from(vector.Tag, 'base64'));
 
-		assert.deepEqual(ciphertext, Buffer.concat([vecCt, vecTag]), 'Ciphertext + Tag: ' + i);
+		assert.deepEqual(ciphertext, new Uint8Array(Buffer.concat([vecCt, vecTag])), 'Ciphertext + Tag: ' + i);
 
 		let plaintext = aead.decrypt(nonce, ciphertext, a);
 		assert.deepEqual(plaintext, m, 'Plaintext: ' + i);
 
 		// Test malformed ciphertext.
-		let badC = Buffer.from(ciphertext);
+		let badC = new Uint8Array(ciphertext);
 		badC[i] ^= 0x23;
 		assert.throws(function() {
 			let foo = aead.decrypt(nonce, badC, a); // eslint-disable-line no-unused-vars
@@ -61,7 +61,7 @@ function testVectorsUnofficial(useUnsafeVartime) {
 		if (i == 0)
 			continue;
 
-		let badA = Buffer.from(a);
+		let badA = new Uint8Array(a);
 		badA[i-1] ^= 0x23;
 		assert.throws(function() {
 			let foo = aead.decrypt(nonce, ciphertext, badA); // eslint-disable-line no-unused-vars
@@ -75,16 +75,16 @@ function testVectorsOfficial(useUnsafeVartime) {
 	for (let i = 0; i < vectors.length; i++) {
 		const vector = vectors[i];
 
-		let key = Buffer.from(vector.Key, 'hex');
-		let nonce = Buffer.from(vector.Nonce, 'hex');
-		let sealed = Buffer.from(vector.Sealed, 'hex');
+		let key = new Uint8Array(Buffer.from(vector.Key, 'hex'));
+		let nonce = new Uint8Array(Buffer.from(vector.Nonce, 'hex'));
+		let sealed = new Uint8Array(Buffer.from(vector.Sealed, 'hex'));
 		let associatedData = vector.AssociatedData;
 		if (associatedData != null) {
-			associatedData = Buffer.from(associatedData, 'hex');
+			associatedData = new Uint8Array(Buffer.from(associatedData, 'hex'));
 		}
 		let message = vector.Message;
 		if (message != null) {
-			message = Buffer.from(message, 'hex');
+			message = new Uint8Array(Buffer.from(message, 'hex'));
 		}
 
 		let aead = new deoxysii.AEAD(key, useUnsafeVartime);
@@ -97,7 +97,7 @@ function testVectorsOfficial(useUnsafeVartime) {
 describe('AEAD', function() {
 	it('should throw on invalid key size', function() {
 		assert.throws(function() {
-			let foo = new deoxysii.AEAD(Buffer.alloc(10)); // eslint-disable-line no-unused-vars
+			let foo = new deoxysii.AEAD(new Uint8Array(10)); // eslint-disable-line no-unused-vars
 		}, deoxysii.ErrKeySize);
 	});
 

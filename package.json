@@ -12,6 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/oasislabs/deoxysii.js.git"
   },
+  "license": "MIT",
   "author": "Oasis Labs Inc. <info@oasislabs.com>",
   "devDependencies": {
     "@babel/core": "^7.3.3",
@@ -26,7 +27,7 @@
     "webpack-command": "^0.4.2"
   },
   "dependencies": {
-    "aes": "git+ssh://git@github.com/oasislabs/aes.js.git",
+    "aes": "git+ssh://git@github.com/oasislabs/aes.js.git#willscott/typedarray",
     "uint32": "^0.2.1"
   }
 }
