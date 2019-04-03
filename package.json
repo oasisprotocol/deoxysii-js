@@ -27,7 +27,7 @@
     "webpack-command": "^0.4.2"
   },
   "dependencies": {
-    "aes": "git+ssh://git@github.com/oasislabs/aes.js.git#willscott/typedarray",
+    "bsaes": "0.0.2",
     "uint32": "^0.2.1"
   }
 }

@@ -20,9 +20,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-var aes = require('aes');
+var aes = require('bsaes');
 var uint32 = require('uint32');
-var unsafe = require('./unsafe');
+var unsafe = require('bsaes/unsafe');
 
 const KeySize = 32;
 const NonceSize = 15;
