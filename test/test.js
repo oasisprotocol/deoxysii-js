@@ -37,8 +37,8 @@ function testVectorsUnofficial(useUnsafeVartime) {
 	for (let i = 0; i < vectors.KnownAnswers.length; i++) {
 		const vector = vectors.KnownAnswers[i];
 
-		const m = msg.slice(0, vector.Length);
-		const a = aad.slice(0, vector.Length);
+		const m = msg.subarray(0, vector.Length);
+		const a = aad.subarray(0, vector.Length);
 
 		let ciphertext = aead.encrypt(nonce, m, a);
 

@@ -96,8 +96,8 @@ function xorRC(t, i) {
 }
 
 function stkDeriveK(key, derivedKs) {
-	let tk2 = new Uint8Array(key.subarray(16, 32));
-	let tk3	= new Uint8Array(key.subarray(0, 16));
+	let tk2 = key.subarray(16, 32);
+	let tk3	= key.subarray(0, 16);
 
 	xorBytes(derivedKs[0], tk2, tk3, stkSize);
 	xorRC(derivedKs[0], 0);
@@ -177,7 +177,6 @@ class implCt32 {
 			aes.load8xU32(stk, stks[0][i], stks[1][i]);
 			aes.addRoundKey(q, stk);
 		}
-
 		aes.store8xU32(ciphertext.subarray(0, 16), ciphertext.subarray(16, 32), q);
 	}
 
@@ -262,27 +261,27 @@ class implUnsafeVartime {
 		deriveSubTweakKeys(stks, derivedKs, tweak);
 
 		const plainView = new DataView(plaintext.buffer);
-		let s0 = plainView.getUint32(0, false);
-		let s1 = plainView.getUint32(4, false);
-		let s2 = plainView.getUint32(8, false);
-		let s3 = plainView.getUint32(12, false);
+		let s0 = plainView.getUint32(0 + plaintext.byteOffset, false);
+		let s1 = plainView.getUint32(4 + plaintext.byteOffset, false);
+		let s2 = plainView.getUint32(8 + plaintext.byteOffset, false);
+		let s3 = plainView.getUint32(12 + plaintext.byteOffset, false);
 
 
 		const stksView = new DataView(stks[0].buffer);
-		s0 = uint32.xor(s0, stksView.getUint32(0, false));
-		s1 = uint32.xor(s1, stksView.getUint32(4, false));
-		s2 = uint32.xor(s2, stksView.getUint32(8, false));
-		s3 = uint32.xor(s3, stksView.getUint32(12, false));
+		s0 = uint32.xor(s0, stksView.getUint32(0 + stks[0].byteOffset, false));
+		s1 = uint32.xor(s1, stksView.getUint32(4 + stks[0].byteOffset, false));
+		s2 = uint32.xor(s2, stksView.getUint32(8 + stks[0].byteOffset, false));
+		s3 = uint32.xor(s3, stksView.getUint32(12 + stks[0].byteOffset, false));
 
 		for (let i = 1; i <= rounds; i++) {
 			[s0, s1, s2, s3] = unsafe.aesencVartime(s0, s1, s2, s3, stks[i]);
 		}
 
 		const cipherView = new DataView(ciphertext.buffer);
-		cipherView.setUint32(0, s0, false);
-		cipherView.setUint32(4, s1, false);
-		cipherView.setUint32(8, s2, false);
-		cipherView.setUint32(12, s3, false);
+		cipherView.setUint32(0 + ciphertext.byteOffset, s0, false);
+		cipherView.setUint32(4 + ciphertext.byteOffset, s1, false);
+		cipherView.setUint32(8 + ciphertext.byteOffset, s2, false);
+		cipherView.setUint32(12 + ciphertext.byteOffset, s3, false);
 	}
 
 	static bcKeystreamx2(ciphertext, derivedKs, tweaks, nonce) {
@@ -311,7 +310,7 @@ class implUnsafeVartime {
 
 function encodeTagTweak(out, prefix, blockNr) {
 	out.set(new Uint8Array(12));
-	new DataView(out.buffer).setUint32(12, blockNr, false);
+	new DataView(out.buffer).setUint32(12 + out.byteOffset, blockNr, false);
 	out[0] = prefix << prefixShift;
 }
 
@@ -338,8 +337,8 @@ function e(impl, derivedKs, nonce, dst, ad, msg) {
 	let i = 0, j = 0;
 
 	// Associated data.
-	let adLen = ad.byteLength;
-	let auth = Buffer.alloc(TagSize);
+	let adLen = ad.length;
+	let auth = new Uint8Array(TagSize);
 	for (i = 0; adLen >= 2*blockSize; i += 2) {
 		encodeTagTweak(tweaks[0], prefixADBlock, i);
 		encodeTagTweak(tweaks[1], prefixADBlock, i+1);
@@ -357,14 +356,14 @@ function e(impl, derivedKs, nonce, dst, ad, msg) {
 		encodeTagTweak(tweaks[0], prefixADFinal, i);
 
 		let aStar = new Uint8Array(blockSize);
-		aStar.set(ad.subarray(ad.byteLength - adLen));
+		aStar.set(ad.subarray(ad.length - adLen));
 		aStar[adLen] = 0x80;
 
 		impl.bcTagx1(auth, derivedKs, tweaks[0], aStar);
 	}
 
 	// Message authentication and tag generation.
-	let msgLen = msg.byteLength;
+	let msgLen = msg.length;
 	for (j = 0; msgLen >= 2*blockSize; j += 2) {
 		encodeTagTweak(tweaks[0], prefixMsgBlock, j);
 		encodeTagTweak(tweaks[1], prefixMsgBlock, j+1);
@@ -382,7 +381,7 @@ function e(impl, derivedKs, nonce, dst, ad, msg) {
 		encodeTagTweak(tweaks[0], prefixMsgFinal, j);
 
 		let mStar = new Uint8Array(blockSize);
-		mStar.set(msg.subarray(msg.byteLength - msgLen));
+		mStar.set(msg.subarray(msg.length - msgLen));
 		mStar[msgLen] = 0x80;
 
 		impl.bcTagx1(auth, derivedKs, tweaks[0], mStar);
@@ -396,7 +395,7 @@ function e(impl, derivedKs, nonce, dst, ad, msg) {
 
 	// Message encryption.
 	encNonce[0] = 0;
-	msgLen = msg.byteLength;
+	msgLen = msg.length;
 	let encBlks = new Uint8Array(2*blockSize);
 	for (j = 0; msgLen >= 2*blockSize; j += 2) {
 		encodeEncTweak(tweaks[0], auth, j);
@@ -409,7 +408,6 @@ function e(impl, derivedKs, nonce, dst, ad, msg) {
 	}
 	for (; msgLen >= blockSize; j++) {
 		encodeEncTweak(tweaks[0], auth, j);
-
 		impl.bcEncrypt(encBlks, derivedKs, tweaks[0], encNonce);
 		xorBytes(dst.subarray(j*blockSize, (j+1)*blockSize), msg.subarray(j*blockSize, (j+1)*blockSize), encBlks, blockSize);
 
@@ -419,15 +417,15 @@ function e(impl, derivedKs, nonce, dst, ad, msg) {
 		encodeEncTweak(tweaks[0], auth, j);
 
 		impl.bcEncrypt(encBlks, derivedKs, tweaks[0], encNonce);
-		xorBytes(dst.subarray(j*blockSize, msg.byteLength), msg.subarray(j*blockSize), encBlks, msgLen);
+		xorBytes(dst.subarray(j*blockSize, msg.length), msg.subarray(j*blockSize), encBlks, msgLen);
 	}
 
 	// Write the tag to the tail.
-	dst.set(auth, msg.byteLength);
+	dst.set(auth, msg.length);
 }
 
 function d(impl, derivedKs, nonce, dst, ad, ct) {
-	let ctLen = ct.byteLength - TagSize;
+	let ctLen = ct.length - TagSize;
 	const ciphertext = ct.subarray(0, ctLen);
 	const tag = ct.subarray(ctLen);
 
@@ -463,7 +461,7 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 
 	// Associated data.
 	let i = 0;
-	let adLen = ad.byteLength;
+	let adLen = ad.length;
 	let tweaks = newTweaks();
 	let auth = new Uint8Array(TagSize);
 	for (i = 0; adLen >= 2*blockSize; i += 2) {
@@ -484,14 +482,14 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 
 		let aStar = new Uint8Array(blockSize);
 
-		aStar.set(ad.subarray(ad.byteLength - adLen));
+		aStar.set(ad.subarray(ad.length - adLen));
 		aStar[adLen] = 0x80;
 
 		impl.bcTagx1(auth, derivedKs, tweaks[0], aStar);
 	}
 
 	// Message authentication and tag generation.
-	let msgLen = dst.byteLength;
+	let msgLen = dst.length;
 	for (j = 0; msgLen >= 2*blockSize; j += 2) {
 		encodeTagTweak(tweaks[0], prefixMsgBlock, j);
 		encodeTagTweak(tweaks[1], prefixMsgBlock, j+1);
@@ -509,7 +507,7 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 		encodeTagTweak(tweaks[0], prefixMsgFinal, j);
 
 		let mStar = new Uint8Array(blockSize);
-		mStar.set(dst.subarray(dst.byteLength - msgLen));
+		mStar.set(dst.subarray(dst.length - msgLen));
 		mStar[msgLen] = 0x80;
 
 		impl.bcTagx1(auth, derivedKs, tweaks[0], mStar);
@@ -528,7 +526,7 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 // expensive.
 class AEAD {
 	constructor(key, useUnsafeVartime = false) {
-		if (key.byteLength != KeySize) {
+		if (key.length != KeySize) {
 			throw ErrKeySize;
 		}
 
@@ -542,7 +540,7 @@ class AEAD {
 	}
 
 	encrypt(nonce, plaintext = null, associatedData = null) {
-		if (nonce.byteLength != NonceSize) {
+		if (nonce.length != NonceSize) {
 			throw ErrNonceSize;
 		}
 
@@ -553,17 +551,17 @@ class AEAD {
 			associatedData = zeroBuffer;
 		}
 
-		let dst = new Uint8Array(plaintext.byteLength + TagSize);
+		let dst = new Uint8Array(plaintext.length + TagSize);
 		e(this.impl, this.derivedKs, nonce, dst, associatedData, plaintext);
 
 		return dst;
 	}
 
 	decrypt(nonce, ciphertext, associatedData) {
-		if (nonce.byteLength != NonceSize) {
+		if (nonce.length != NonceSize) {
 			throw ErrNonceSize;
 		}
-		if (ciphertext.byteLength < TagSize) {
+		if (ciphertext.length < TagSize) {
 			throw ErrOpen;
 		}
 
@@ -571,7 +569,7 @@ class AEAD {
 			associatedData = zeroBuffer;
 		}
 
-		let dst = new Uint8Array(ciphertext.byteLength - TagSize);
+		let dst = new Uint8Array(ciphertext.length - TagSize);
 		if (!d(this.impl, this.derivedKs, nonce, dst, associatedData, ciphertext)) {
 			dst.set(new Uint8Array(dst.length));
 			throw ErrOpen;
