@@ -45,7 +45,10 @@ function testVectorsUnofficial(useUnsafeVartime) {
 		const vecCt = new Uint8Array(Buffer.from(vector.Ciphertext, 'base64'));
 		const vecTag = new Uint8Array(Buffer.from(vector.Tag, 'base64'));
 
-		assert.deepEqual(ciphertext, new Uint8Array(Buffer.concat([vecCt, vecTag])), 'Ciphertext + Tag: ' + i);
+		const expectedCipher = new Uint8Array(vecCt.length + vecTag.length);
+		expectedCipher.set(vecCt, 0);
+		expectedCipher.set(vecTag, vecCt.length);
+		assert.deepEqual(ciphertext, expectedCipher, 'Ciphertext + Tag: ' + i);
 
 		let plaintext = aead.decrypt(nonce, ciphertext, a);
 		assert.deepEqual(plaintext, m, 'Plaintext: ' + i);

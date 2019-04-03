@@ -22,7 +22,6 @@
 
 var aes = require('aes');
 var uint32 = require('uint32');
-var timingSafeEqual = require('crypto').timingSafeEqual;
 var unsafe = require('./unsafe');
 
 const KeySize = 32;
@@ -516,7 +515,16 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 	decNonce[0] = prefixTag << prefixShift;
 	impl.bcEncrypt(auth, derivedKs, decNonce, auth);
 
-	return timingSafeEqual(auth, tag);
+	// crypto.timingSafeEqual is not implemented on typed arrays.
+	if (auth.length != tag.length) {
+		return false;
+	}
+	let eql = true;
+	for (i = 0; i < auth.length; i++) {
+		eql &= !(auth[i] ^ tag[i]);
+	}
+
+	return eql;
 }
 
 // The AEAD implementation.
