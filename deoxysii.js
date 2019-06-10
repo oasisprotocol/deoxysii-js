@@ -58,7 +58,7 @@ const rcons = new Uint8Array([
 
 function h(t) {
 	const tmp = new Uint8Array([
-		t[7], t[0], t[13], t[10], t[11], t[4], t[1], t[14], t[15], t[8], t[5], t[2], t[3], t[12], t[9], t[6]
+		t[1], t[6], t[11], t[12], t[5], t[10], t[15], t[0], t[9], t[14], t[3], t[4], t[13], t[2], t[7], t[8]
 	]);
 	t.set(tmp);
 }
