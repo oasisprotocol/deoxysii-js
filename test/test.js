@@ -105,9 +105,11 @@ describe('AEAD', function() {
 	});
 
 	it('ct32: should match unofficial test vectors', function() {
+		this.timeout(5000);
 		testVectorsUnofficial(false);
 	});
 	it('vartime: should match unofficial test vectors', function() {
+		this.timeout(5000);
 		testVectorsUnofficial(true);
 	});
 
