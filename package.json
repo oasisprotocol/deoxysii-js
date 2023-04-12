@@ -1,6 +1,6 @@
 {
   "name": "deoxysii",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Deoxys-II-256-128",
   "main": "./deoxysii",
   "types": "./deoxysii.d.ts",
