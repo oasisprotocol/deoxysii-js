@@ -20,8 +20,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// @ts-expect-error TODO: missing types
 var aes = require('bsaes');
 var uint32 = require('uint32');
+// @ts-expect-error TODO: missing types
 var unsafe = require('bsaes/unsafe');
 
 const KeySize = 32;
@@ -619,6 +621,7 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 	}
 	let eql = true;
 	for (i = 0; i < auth.length; i++) {
+		// @ts-expect-error TODO: should this return a boolean
 		eql &= !(auth[i] ^ tag[i]);
 	}
 
