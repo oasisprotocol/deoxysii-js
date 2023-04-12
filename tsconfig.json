@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "checkJs": true,
+    "resolveJsonModule": true,
+
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "removeComments": true,
+  },
+  "files": ["./deoxysii.js"]
+}

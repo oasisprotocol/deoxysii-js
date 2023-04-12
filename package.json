@@ -3,7 +3,9 @@
   "version": "0.0.2",
   "description": "Deoxys-II-256-128",
   "main": "./deoxysii",
+  "types": "./deoxysii.d.ts",
   "scripts": {
+    "build": "tsc",
     "bench": "node ./bench/bench.js",
     "test": "mocha",
     "lint": "eslint *.js ./test ./bench"
@@ -15,10 +17,15 @@
   "license": "MIT",
   "author": "Oasis Labs Inc. <info@oasislabs.com>",
   "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.15.11",
+    "@types/uint32": "^0.2.0",
     "benchmark": "^2.1.4",
     "chai": "*",
     "eslint": "^5.14.0",
-    "mocha": "^6.1.4"
+    "mocha": "^6.1.4",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "bsaes": "0.0.2",

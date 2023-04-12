@@ -24,6 +24,7 @@
 var assert = require('chai').assert;
 var deoxysii = require('../deoxysii');
 
+/** @param {boolean} useUnsafeVartime */
 function testVectorsUnofficial(useUnsafeVartime) {
 	const vectors = require('./Deoxys-II-256-128.json');
 
@@ -72,6 +73,7 @@ function testVectorsUnofficial(useUnsafeVartime) {
 	}
 }
 
+/** @param {boolean} useUnsafeVartime */
 function testVectorsOfficial(useUnsafeVartime) {
 	const vectors = require('./TestVectors.json');
 
@@ -81,14 +83,8 @@ function testVectorsOfficial(useUnsafeVartime) {
 		let key = new Uint8Array(Buffer.from(vector.Key, 'hex'));
 		let nonce = new Uint8Array(Buffer.from(vector.Nonce, 'hex'));
 		let sealed = new Uint8Array(Buffer.from(vector.Sealed, 'hex'));
-		let associatedData = vector.AssociatedData;
-		if (associatedData != null) {
-			associatedData = new Uint8Array(Buffer.from(associatedData, 'hex'));
-		}
-		let message = vector.Message;
-		if (message != null) {
-			message = new Uint8Array(Buffer.from(message, 'hex'));
-		}
+		let associatedData = vector.AssociatedData != null ? new Uint8Array(Buffer.from(vector.AssociatedData, 'hex')) : null
+		let message = vector.Message != null ? new Uint8Array(Buffer.from(vector.Message, 'hex')) : null
 
 		let aead = new deoxysii.AEAD(key, useUnsafeVartime);
 
