@@ -1,5 +1,5 @@
 {
-  "name": "deoxysii",
+  "name": "@oasisprotocol/deoxysii",
   "version": "0.0.3",
   "description": "Deoxys-II-256-128",
   "main": "./deoxysii",
@@ -12,10 +12,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oasislabs/deoxysii.js.git"
+    "url": "https://github.com/oasisprotocol/deoxysii-js.git"
   },
   "license": "MIT",
-  "author": "Oasis Labs Inc. <info@oasislabs.com>",
+  "author": "Oasis Protocol Foundation <info@oasisprotocol.org>",
   "devDependencies": {
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
