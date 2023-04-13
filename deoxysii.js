@@ -20,8 +20,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// @ts-expect-error TODO: missing types
 var aes = require('bsaes');
 var uint32 = require('uint32');
+// @ts-expect-error TODO: missing types
 var unsafe = require('bsaes/unsafe');
 
 const KeySize = 32;
@@ -40,6 +42,12 @@ const prefixMsgFinal = 0x04;
 const prefixTag = 0x01;
 const prefixShift = 4;
 
+/**
+ * @param {Uint8Array} dst
+ * @param {Uint8Array} a
+ * @param {Uint8Array} b
+ * @param {number} n
+ */
 function xorBytes(dst, a, b, n) {
 	for (let i = 0; i < n; i++) {
 		dst[i] = a[i] ^ b[i];
@@ -56,6 +64,9 @@ const rcons = new Uint8Array([
 	0x72
 ]);
 
+/**
+ * @param {Uint8Array} t
+ */
 function h(t) {
 	const tmp = new Uint8Array([
 		t[1], t[6], t[11], t[12], t[5], t[10], t[15], t[0], t[9], t[14], t[3], t[4], t[13], t[2], t[7], t[8]
@@ -63,6 +74,9 @@ function h(t) {
 	t.set(tmp);
 }
 
+/**
+ * @param {Uint8Array} t
+ */
 function lfsr2(t) {
 	for (let i = 0; i < stkSize; i++) {
 		const x = t[i];
@@ -73,6 +87,9 @@ function lfsr2(t) {
 	}
 }
 
+/**
+ * @param {Uint8Array} t
+ */
 function lfsr3(t) {
 	for (let i = 0; i < stkSize; i++) {
 		const x = t[i];
@@ -83,6 +100,10 @@ function lfsr3(t) {
 	}
 }
 
+/**
+ * @param {Uint8Array} t
+ * @param {number} i
+ */
 function xorRC(t, i) {
 	t[0] ^= 1;
 	t[1] ^= 2;
@@ -94,6 +115,10 @@ function xorRC(t, i) {
 	t[7] ^= rcons[i];
 }
 
+/**
+ * @param {Uint8Array} key
+ * @param {Uint8Array[]} derivedKs
+ */
 function stkDeriveK(key, derivedKs) {
 	let tk2 = key.subarray(16, 32);
 	let tk3	= key.subarray(0, 16);
@@ -112,6 +137,11 @@ function stkDeriveK(key, derivedKs) {
 	}
 }
 
+/**
+ * @param {Uint8Array[]} stks
+ * @param {Uint8Array[]} derivedKs
+ * @param {Uint8Array} tweak
+ */
 function deriveSubTweakKeys(stks, derivedKs, tweak) {
 	let tk1 = new Uint8Array(tweak);
 
@@ -136,6 +166,12 @@ function newStks() {
 //
 
 class implCt32 {
+	/**
+	 * @param {Uint8Array} ciphertext
+	 * @param {Uint8Array[]} derivedKs
+	 * @param {Uint8Array} tweak
+	 * @param {Uint8Array} plaintext
+	 */
 	static bcEncrypt(ciphertext, derivedKs, tweak, plaintext) {
 		let stks = newStks();
 		deriveSubTweakKeys(stks, derivedKs, tweak);
@@ -157,6 +193,12 @@ class implCt32 {
 		aes.store4xU32(ciphertext, q);
 	}
 
+	/**
+	 * @param {Uint8Array} ciphertext
+	 * @param {Uint8Array[]} derivedKs
+	 * @param {Uint8Array[]} tweaks
+	 * @param {Uint8Array} nonce
+	 */
 	static bcKeystreamx2(ciphertext, derivedKs, tweaks, nonce) {
 		let stks = [ newStks(), newStks() ];
 		for (let i = 0; i < 2; i++) {
@@ -178,7 +220,12 @@ class implCt32 {
 		}
 		aes.store8xU32(ciphertext.subarray(0, 16), ciphertext.subarray(16, 32), q);
 	}
-
+	/**
+	 * @param {Uint8Array} tag
+	 * @param {Uint8Array[]} derivedKs
+	 * @param {Uint8Array} tweak
+	 * @param {Uint8Array} plaintext
+	 */
 	static bcTagx1(tag, derivedKs, tweak, plaintext) {
 		let stks = newStks();
 		deriveSubTweakKeys(stks, derivedKs, tweak);
@@ -215,6 +262,12 @@ class implCt32 {
 		tagView.setUint32(12, tag3, true);
 	}
 
+	/**
+	 * @param {Uint8Array} tag
+	 * @param {Uint8Array[]} derivedKs
+	 * @param {Uint8Array[]} tweaks
+	 * @param {Uint8Array} plaintext
+	 */
 	static bcTagx2(tag, derivedKs, tweaks, plaintext) {
 		let stks = [ newStks(), newStks() ];
 		for (let i = 0; i < 2; i++) {
@@ -255,6 +308,12 @@ class implCt32 {
 }
 
 class implUnsafeVartime {
+	/**
+	 * @param {Uint8Array} ciphertext
+	 * @param {Uint8Array[]} derivedKs
+	 * @param {Uint8Array} tweak
+	 * @param {Uint8Array} plaintext
+	 */
 	static bcEncrypt(ciphertext, derivedKs, tweak, plaintext) {
 		let stks = newStks();
 		deriveSubTweakKeys(stks, derivedKs, tweak);
@@ -282,18 +341,33 @@ class implUnsafeVartime {
 		cipherView.setUint32(8 + ciphertext.byteOffset, s2, false);
 		cipherView.setUint32(12 + ciphertext.byteOffset, s3, false);
 	}
-
+	/**
+	 * @param {Uint8Array} ciphertext
+	 * @param {Uint8Array[]} derivedKs
+	 * @param {Uint8Array[]} tweaks
+	 * @param {Uint8Array} nonce
+	 */
 	static bcKeystreamx2(ciphertext, derivedKs, tweaks, nonce) {
 		this.bcEncrypt(ciphertext.subarray(0, 16), derivedKs, tweaks[0], nonce);
 		this.bcEncrypt(ciphertext.subarray(16, 32), derivedKs, tweaks[1], nonce);
 	}
-
+	/**
+	 * @param {Uint8Array} tag
+	 * @param {Uint8Array[]} derivedKs
+	 * @param {Uint8Array} tweak
+	 * @param {Uint8Array} plaintext
+	 */
 	static bcTagx1(tag, derivedKs, tweak, plaintext) {
 		let tmp = new Uint8Array(blockSize);
 		this.bcEncrypt(tmp, derivedKs, tweak, plaintext);
 		xorBytes(tag, tag, tmp, blockSize);
 	}
-
+	/**
+ * @param {Uint8Array} tag
+ * @param {Uint8Array[]} derivedKs
+ * @param {Uint8Array[]} tweaks
+ * @param {Uint8Array} plaintext
+ */
 	static bcTagx2(tag, derivedKs, tweaks, plaintext) {
 		let tmp = new Uint8Array(2*blockSize);
 		this.bcEncrypt(tmp.subarray(0, 16), derivedKs, tweaks[0], plaintext.subarray(0, 16));
@@ -307,12 +381,22 @@ class implUnsafeVartime {
 // Put it all together
 //
 
+/**
+ * @param {Uint8Array} out
+ * @param {number} prefix
+ * @param {number} blockNr
+ */
 function encodeTagTweak(out, prefix, blockNr) {
 	out.set(new Uint8Array(12));
 	new DataView(out.buffer).setUint32(12 + out.byteOffset, blockNr, false);
 	out[0] = prefix << prefixShift;
 }
 
+/**
+ * @param {Uint8Array} out
+ * @param {Uint8Array} tag
+ * @param {number} blockNr
+ */
 function encodeEncTweak(out, tag, blockNr) {
 	var tmp = new Uint8Array(4);
 	new DataView(tmp.buffer).setUint32(0, blockNr, false);
@@ -331,6 +415,14 @@ function newTweaks() {
 	return tweaks;
 }
 
+/**
+ * @param {typeof implUnsafeVartime | typeof implCt32} impl
+ * @param {Uint8Array[]} derivedKs
+ * @param {Uint8Array} nonce
+ * @param {Uint8Array} dst
+ * @param {Uint8Array} ad
+ * @param {Uint8Array} msg
+ */
 function e(impl, derivedKs, nonce, dst, ad, msg) {
 	let tweaks = newTweaks();
 	let i = 0, j = 0;
@@ -423,6 +515,14 @@ function e(impl, derivedKs, nonce, dst, ad, msg) {
 	dst.set(auth, msg.length);
 }
 
+/**
+ * @param {typeof implUnsafeVartime | typeof implCt32} impl
+ * @param {Uint8Array[]} derivedKs
+ * @param {Uint8Array} nonce
+ * @param {Uint8Array} dst
+ * @param {Uint8Array} ad
+ * @param {Uint8Array} ct
+ */
 function d(impl, derivedKs, nonce, dst, ad, ct) {
 	let ctLen = ct.length - TagSize;
 	const ciphertext = ct.subarray(0, ctLen);
@@ -521,6 +621,7 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 	}
 	let eql = true;
 	for (i = 0; i < auth.length; i++) {
+		// @ts-expect-error TODO: should this return a boolean
 		eql &= !(auth[i] ^ tag[i]);
 	}
 
@@ -533,20 +634,26 @@ function d(impl, derivedKs, nonce, dst, ad, ct) {
 // be reused as deriving the K contribution of the Sub-Tweak Key is relatively
 // expensive.
 class AEAD {
+	/**
+	 * @param {Uint8Array} key
+	 * @param {boolean} useUnsafeVartime
+	 */
 	constructor(key, useUnsafeVartime = false) {
 		if (key.length != KeySize) {
 			throw ErrKeySize;
 		}
 
-		if (useUnsafeVartime) {
-			this.impl = implUnsafeVartime;
-		} else {
-			this.impl = implCt32;
-		}
+		/** @type {typeof implUnsafeVartime | typeof implCt32} */
+		this.impl = useUnsafeVartime ? implUnsafeVartime : implCt32
 		this.derivedKs = newStks();
 		stkDeriveK(key, this.derivedKs);
 	}
 
+	/**
+	 * @param {Uint8Array} nonce
+	 * @param {Uint8Array | null} plaintext
+	 * @param {Uint8Array | null} associatedData
+	 */
 	encrypt(nonce, plaintext = null, associatedData = null) {
 		if (nonce.length != NonceSize) {
 			throw ErrNonceSize;
@@ -565,6 +672,11 @@ class AEAD {
 		return dst;
 	}
 
+	/**
+	 * @param {Uint8Array} nonce
+	 * @param {Uint8Array} ciphertext
+	 * @param {Uint8Array} associatedData
+	 */
 	decrypt(nonce, ciphertext, associatedData) {
 		if (nonce.length != NonceSize) {
 			throw ErrNonceSize;

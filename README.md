@@ -1,5 +1,5 @@
 ### deoxysii.js - JavaScript Deoxys-II-256-128
-[![CircleCI](https://circleci.com/gh/oasislabs/deoxysii.js.svg?style=svg&circle-token=8b606daffa51d54f9fb41c95583ddebc59f064d9)](https://circleci.com/gh/oasislabs/deoxysii.js)
+![GitHub CI](https://github.com/oasislabs/deoxysii.js/actions/workflows/config.yml/badge.svg)
 
 > When I find my code in tons of trouble,
 > Friends and colleagues come to me,
