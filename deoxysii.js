@@ -675,9 +675,9 @@ class AEAD {
 	/**
 	 * @param {Uint8Array} nonce
 	 * @param {Uint8Array} ciphertext
-	 * @param {Uint8Array} associatedData
+	 * @param {Uint8Array | null} associatedData
 	 */
-	decrypt(nonce, ciphertext, associatedData) {
+	decrypt(nonce, ciphertext, associatedData = null) {
 		if (nonce.length != NonceSize) {
 			throw ErrNonceSize;
 		}
