@@ -1,6 +1,6 @@
 {
   "name": "@oasisprotocol/deoxysii",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Deoxys-II-256-128",
   "main": "./deoxysii",
   "types": "./deoxysii.d.ts",
