@@ -9,7 +9,7 @@ export class AEAD {
     impl: typeof implUnsafeVartime | typeof implCt32;
     derivedKs: Uint8Array[];
     encrypt(nonce: Uint8Array, plaintext?: Uint8Array | null, associatedData?: Uint8Array | null): Uint8Array;
-    decrypt(nonce: Uint8Array, ciphertext: Uint8Array, associatedData: Uint8Array): Uint8Array;
+    decrypt(nonce: Uint8Array, ciphertext: Uint8Array, associatedData?: Uint8Array | null): Uint8Array;
 }
 declare class implUnsafeVartime {
     static bcEncrypt(ciphertext: Uint8Array, derivedKs: Uint8Array[], tweak: Uint8Array, plaintext: Uint8Array): void;
