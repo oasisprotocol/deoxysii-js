@@ -23,19 +23,12 @@
 // SOFTWARE.
 
 import { expect, test } from "vitest";
-import {
-	AEAD,
-	ErrKeySize,
-	ErrNonceSize,
-	ErrOpen,
-	NonceSize,
-	TagSize,
-} from "./deoxysii";
+import deoxysii from "./deoxysii";
 
 test("should throw on invalid key size", () => {
 	expect(() => {
-		new AEAD(new Uint8Array(10));
-	}).toThrow(ErrKeySize);
+		new deoxysii.AEAD(new Uint8Array(10));
+	}).toThrow(deoxysii.ErrKeySize);
 });
 
 test("ct32: should match unofficial test vectors", () => {
@@ -46,7 +39,7 @@ test("ct32: should match unofficial test vectors", () => {
 	const aad = new Uint8Array(Buffer.from(vectors.AADData, "base64"));
 	const msg = new Uint8Array(Buffer.from(vectors.MsgData, "base64"));
 
-	const aead = new AEAD(key);
+	const aead = new deoxysii.AEAD(key);
 
 	for (let i = 0; i < vectors.KnownAnswers.length; i++) {
 		const vector = vectors.KnownAnswers[i];
@@ -72,7 +65,7 @@ test("ct32: should match unofficial test vectors", () => {
 		badC[i] ^= 0x23;
 		expect(() => {
 			aead.decrypt(nonce, badC, a);
-		}).toThrow(ErrOpen);
+		}).toThrow(deoxysii.ErrOpen);
 
 		// Test malformed AD.
 		if (i === 0) continue;
@@ -81,7 +74,7 @@ test("ct32: should match unofficial test vectors", () => {
 		badA[i - 1] ^= 0x23;
 		expect(() => {
 			aead.decrypt(nonce, ciphertext, badA);
-		}).toThrow(ErrOpen);
+		}).toThrow(deoxysii.ErrOpen);
 	}
 }, 5000);
 
@@ -103,7 +96,7 @@ test("ct32: should match official test vectors", () => {
 				? new Uint8Array(Buffer.from(vector.Message, "hex"))
 				: null;
 
-		const aead = new AEAD(key);
+		const aead = new deoxysii.AEAD(key);
 
 		const ciphertext = aead.encrypt(nonce, message, associatedData);
 		expect(ciphertext, `Ciphertext: ${vector.Name}`).toStrictEqual(sealed);
@@ -118,31 +111,31 @@ test("parameter semantics", () => {
 	const aad = new Uint8Array(Buffer.from(vectors.AADData, "base64"));
 	const msg = new Uint8Array(Buffer.from(vectors.MsgData, "base64"));
 
-	const aead = new AEAD(key);
+	const aead = new deoxysii.AEAD(key);
 
 	// encrypt with wrong nonce length
 	expect(() => aead.encrypt(nonce)).not.toThrow();
-	expect(() => aead.encrypt(nonce.subarray(0, NonceSize - 1))).toThrow(
-		ErrNonceSize,
+	expect(() => aead.encrypt(nonce.subarray(0, deoxysii.NonceSize - 1))).toThrow(
+		deoxysii.ErrNonceSize,
 	);
 
 	// decrypt with wrong nonce length
 	const ciphertext = aead.encrypt(nonce, msg, aad);
 	expect(() =>
-		aead.decrypt(nonce.subarray(0, NonceSize - 1), ciphertext, aad),
-	).toThrow(ErrNonceSize);
+		aead.decrypt(nonce.subarray(0, deoxysii.NonceSize - 1), ciphertext, aad),
+	).toThrow(deoxysii.ErrNonceSize);
 	expect(aead.decrypt(nonce, ciphertext, aad)).toStrictEqual(msg);
 
 	// more variations of decrypt
 	expect(() => aead.decrypt(nonce, ciphertext, aad)).not.toThrow();
 	expect(() =>
-		aead.decrypt(nonce, ciphertext.subarray(0, TagSize), aad),
-	).toThrow(ErrOpen);
+		aead.decrypt(nonce, ciphertext.subarray(0, deoxysii.TagSize), aad),
+	).toThrow(deoxysii.ErrOpen);
 	expect(() =>
-		aead.decrypt(nonce, ciphertext.subarray(0, TagSize - 1), aad),
-	).toThrow(ErrOpen);
-	expect(() => aead.decrypt(nonce, ciphertext)).toThrow(ErrOpen);
+		aead.decrypt(nonce, ciphertext.subarray(0, deoxysii.TagSize - 1), aad),
+	).toThrow(deoxysii.ErrOpen);
+	expect(() => aead.decrypt(nonce, ciphertext)).toThrow(deoxysii.ErrOpen);
 	expect(() =>
-		aead.decrypt(nonce.subarray(0, NonceSize - 1), ciphertext, aad),
-	).toThrow(ErrNonceSize);
+		aead.decrypt(nonce.subarray(0, deoxysii.NonceSize - 1), ciphertext, aad),
+	).toThrow(deoxysii.ErrNonceSize);
 });
