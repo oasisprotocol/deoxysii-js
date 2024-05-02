@@ -27,7 +27,8 @@ import { AEAD, KeySize, NonceSize } from "./deoxysii";
 
 const aeadCt32 = new AEAD(Buffer.alloc(KeySize));
 const nonce = Buffer.alloc(NonceSize);
-const src = Buffer.alloc(1024768);
+const MAX_ADVISED_SIZE = 2 ** 16;
+const src = Buffer.alloc(MAX_ADVISED_SIZE);
 
 bench(
 	"ct32: Encrypt 8",
@@ -78,9 +79,9 @@ bench(
 );
 
 bench(
-	"ct32: Encrypt 1024768",
+	`ct32: Encrypt ${MAX_ADVISED_SIZE}`,
 	() => {
-		aeadCt32.encrypt(nonce, src.subarray(0, 1024768), null);
+		aeadCt32.encrypt(nonce, src.subarray(0, MAX_ADVISED_SIZE), null);
 	},
 	{ time: 5000 },
 );

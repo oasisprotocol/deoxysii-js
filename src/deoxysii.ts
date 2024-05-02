@@ -610,17 +610,15 @@ function d(
 	return eql;
 }
 
-// The AEAD implementation.
-//
-// As much as possible (as long as the key does not change), instances should
-// be reused as deriving the K contribution of the Sub-Tweak Key is relatively
-// expensive.
+/**
+ * The AEAD implementation.
+ * As much as possible (as long as the key does not change), instances should
+ * be reused as deriving the K contribution of the Sub-Tweak Key is relatively
+ * expensive.
+ */
 export class AEAD {
 	protected derivedKs: Uint8Array[];
 
-	/**
-	 * @param {Uint8Array} key
-	 */
 	constructor(key: Uint8Array) {
 		if (key.length !== KeySize) {
 			throw ErrKeySize;
@@ -629,11 +627,6 @@ export class AEAD {
 		stkDeriveK(key, this.derivedKs);
 	}
 
-	/**
-	 * @param {Uint8Array} nonce
-	 * @param {Uint8Array | null} plaintext
-	 * @param {Uint8Array | null} associatedData
-	 */
 	public encrypt(
 		nonce: Uint8Array,
 		plaintext: Uint8Array | null = null,
@@ -658,11 +651,6 @@ export class AEAD {
 		return dst;
 	}
 
-	/**
-	 * @param {Uint8Array} nonce
-	 * @param {Uint8Array} ciphertext
-	 * @param {Uint8Array | null} associatedData
-	 */
 	public decrypt(
 		nonce: Uint8Array,
 		ciphertext: Uint8Array,

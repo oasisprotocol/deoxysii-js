@@ -3,6 +3,7 @@
 [![version][deoxysii-version]][deoxysii-npm]
 [![size][deoxysii-size]][deoxysii-bundlephobia]
 ![downloads][deoxysii-downloads]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [deoxysii-npm]: https://www.npmjs.com/package/@oasisprotocol/deoxysii
 [deoxysii-version]: https://img.shields.io/npm/v/@oasisprotocol/deoxysii
@@ -71,11 +72,24 @@ try {
 > Users that require a more performant and secure implementation are suggested
 > to investigate WebAssembly, or (even better) calling native code.
 
-#### Acknowledgements
+#### Development
 
-This MIT licensed project utilizes modified code originally developed by Franz X
-Antesberger. The original code for `uint32.js` is available at [fxa/uint32.js].
-We have adapted this code for TypeScript. We appreciate the contributions of
-Franz X Antesberger to the open-source community.
+ * [Node.js](https://nodejs.org/en/about/previous-releases) - version 18+
+ * [typescript](https://www.typescriptlang.org/) - version 5.x, for type safety
+ * [pnpm](https://pnpm.io/) - package manager
+ * [`gh act`](https://github.com/nektos/act) - run GitHub actions locally
+ * [vitest](https://vitest.dev/) - tests, benchmarking & coverage
+ * [biome](https://biomejs.dev/) - lint & formatting
+ * [tsup](https://tsup.egoist.dev/) - compilation & bundling
+ * [publint](https://publint.dev/) - packaging checks
+
+#### License & Acknowledgements
+
+This project is released under the MIT License.
+
+This project utilizes modified code originally developed by Franz X Antesberger.
+The original code for `uint32.js` is available at [fxa/uint32.js]. We have
+adapted this code for TypeScript. We appreciate the contributions of Franz X
+Antesberger to the open-source community.
 
 [fxa/uint32.js]: https://github.com/fxa/uint32.js

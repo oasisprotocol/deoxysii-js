@@ -3,32 +3,43 @@
 	"version": "0.0.6",
 	"description": "Deoxys-II-256-128",
 	"sideEffects": false,
-	"files": ["dist", "!dist/*.tsbuildinfo", "src", "!src/*.json"],
-	"main": "./dist/_cjs/index.js",
-	"module": "./dist/_esm/index.js",
-	"types": "./dist/_types/index.d.ts",
-	"typings": "./dist/_types/index.d.ts",
+	"files": [
+		"dist",
+		"!dist/*.tsbuildinfo",
+		"LICENSE",
+		"src",
+		"!src/*.test.ts",
+		"!src/*.bench.ts"
+	],
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"type": "commonjs",
 	"exports": {
-		"node": {
-			"import": "./dist/_esm/index.js",
-			"require": "./dist/_cjs/index.cjs",
-			"types": "./dist/_types/index.d.ts"
-		},
-		"types": "./dist/_types/index.d.ts",
-		"default": "./dist/_esm/index.js"
+		".": {
+			"require": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			}
+		}
 	},
 	"scripts": {
 		"bench": "pnpm vitest bench src/*.bench.ts",
 		"test": "vitest",
-		"coverage": "vitest run --coverage --coverage.exclude=scripts --coverage.exclude='src/*.bench.ts'",
+		"coverage": "vitest run --coverage --coverage.exclude=scripts --coverage.exclude='src/*.bench.ts' --coverage.exclude='examples'",
 		"lint": "biome check .",
 		"format": "biome format --write .",
-		"clean": "rm -rf dist",
-		"build": "npm run build:cjs && npm run build:esm && npm run build:types",
-		"build:cjs": "tsc --project ./tsconfig.build.json --module commonjs --outDir ./dist/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./dist/_cjs/package.json && node scripts/rename-cjs.mjs",
-		"build:esm": "tsc --project ./tsconfig.build.json --module es2015 --outDir ./dist/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./dist/_esm/package.json",
-		"build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./dist/_types --emitDeclarationOnly --declaration --declarationMap",
-		"prepublishOnly": "npm run build"
+		"clean": "rm -rf dist coverage",
+		"distclean": "pnpm run clean && rm -rf node_modules *.tgz",
+		"build": "pnpm tsup src/index.ts --format cjs,esm --dts --clean",
+		"prepublishOnly": "npm run build",
+		"debug-imports-cjs": "NODE_DEBUG=module,esm bash -c 'pnpm node --experimental-global-webcrypto examples/check.cjs 2> >(grep deoxysii)'",
+		"debug-imports-esm": "NODE_DEBUG=module,esm bash -c 'pnpm node --experimental-global-webcrypto examples/check.mjs 2> >(grep deoxysii)'",
+		"debug-imports": "pnpm run debug-imports-cjs && pnpm run debug-imports-esm"
 	},
 	"repository": {
 		"type": "git",
@@ -40,9 +51,10 @@
 		"@biomejs/biome": "^1.7.0",
 		"@types/node": "18.x",
 		"@vitest/coverage-v8": "^1.5.3",
-		"benchmark": "^2.1.4",
-		"vitest": "^1.5.3",
-		"typescript": ">=5.0.4"
+		"publint": "^0.2.7",
+		"tsup": "^8.0.2",
+		"typescript": ">=5.0.4",
+		"vitest": "^1.5.3"
 	},
 	"peerDependencies": {
 		"typescript": ">=5.0.4"

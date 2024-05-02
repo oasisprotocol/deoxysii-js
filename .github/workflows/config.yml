@@ -22,3 +22,7 @@ jobs:
       - run: pnpm run lint
       - run: pnpm run coverage
       - run: pnpm run build
+      - run: pnpm run debug-imports
+      - run: pnpm run bench
+      - run: pnpm pack
+      - run: pnpm publint
