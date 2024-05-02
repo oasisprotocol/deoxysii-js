@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "start": "node all-cjs.cjs && node all-esm.mjs",
+    "tsup": "yarn tsup src/deoxysii.ts --format cjs,esm --dts"
+  },
+  "dependencies": {
+    "@oasisprotocol/deoxysii": "^0.0.5",
+    "@oasisprotocol/deoxysii-no-namespace6": "../oasisprotocol-deoxysii-no-namespace6-0.0.6.tgz",
+    "@oasisprotocol/deoxysii-tsup6": "../oasisprotocol-deoxysii-tsup6-0.0.6.tgz",
+    "@oasisprotocol/deoxysii6": "../oasisprotocol-deoxysii-0.0.6.tgz"
+  }
+}
