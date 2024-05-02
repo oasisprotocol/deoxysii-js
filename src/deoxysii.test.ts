@@ -1,4 +1,6 @@
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2019 Oasis Labs Inc. <info@oasislabs.com>
+// Copyright (c) 2024 Oasis Protocol Foundation <info@oasisprotocol.org>
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -20,20 +22,31 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/* globals describe,it */
-var assert = require('chai').assert;
-var deoxysii = require('../deoxysii');
+import { expect, test } from "vitest";
+import {
+	AEAD,
+	ErrKeySize,
+	ErrNonceSize,
+	ErrOpen,
+	NonceSize,
+	TagSize,
+} from "./index";
 
-/** @param {boolean} useUnsafeVartime */
-function testVectorsUnofficial(useUnsafeVartime) {
-	const vectors = require('./Deoxys-II-256-128.json');
+test("should throw on invalid key size", () => {
+	expect(() => {
+		new AEAD(new Uint8Array(10));
+	}).toThrow(ErrKeySize);
+});
 
-	let key = new Uint8Array(Buffer.from(vectors.Key, 'base64'));
-	let nonce = new Uint8Array(Buffer.from(vectors.Nonce, 'base64'));
-	let aad = new Uint8Array(Buffer.from(vectors.AADData, 'base64'));
-	let msg = new Uint8Array(Buffer.from(vectors.MsgData, 'base64'));
+test("ct32: should match unofficial test vectors", () => {
+	const vectors = require("../test/Deoxys-II-256-128.json");
 
-	let aead = new deoxysii.AEAD(key, useUnsafeVartime);
+	const key = new Uint8Array(Buffer.from(vectors.Key, "base64"));
+	const nonce = new Uint8Array(Buffer.from(vectors.Nonce, "base64"));
+	const aad = new Uint8Array(Buffer.from(vectors.AADData, "base64"));
+	const msg = new Uint8Array(Buffer.from(vectors.MsgData, "base64"));
+
+	const aead = new AEAD(key);
 
 	for (let i = 0; i < vectors.KnownAnswers.length; i++) {
 		const vector = vectors.KnownAnswers[i];
@@ -41,78 +54,95 @@ function testVectorsUnofficial(useUnsafeVartime) {
 		const m = msg.subarray(0, vector.Length);
 		const a = aad.subarray(0, vector.Length);
 
-		let ciphertext = aead.encrypt(nonce, m, a);
+		const ciphertext = aead.encrypt(nonce, m, a);
 
-		const vecCt = new Uint8Array(Buffer.from(vector.Ciphertext, 'base64'));
-		const vecTag = new Uint8Array(Buffer.from(vector.Tag, 'base64'));
+		const vecCt = new Uint8Array(Buffer.from(vector.Ciphertext, "base64"));
+		const vecTag = new Uint8Array(Buffer.from(vector.Tag, "base64"));
 
 		const expectedCipher = new Uint8Array(vecCt.length + vecTag.length);
 		expectedCipher.set(vecCt, 0);
 		expectedCipher.set(vecTag, vecCt.length);
-		assert.deepEqual(ciphertext, expectedCipher, 'Ciphertext + Tag: ' + i);
+		expect(ciphertext, `Ciphertext + Tag: ${i}`).toStrictEqual(expectedCipher);
 
-		let plaintext = aead.decrypt(nonce, ciphertext, a);
-		assert.deepEqual(plaintext, m, 'Plaintext: ' + i);
+		const plaintext = aead.decrypt(nonce, ciphertext, a);
+		expect(plaintext, `Plaintext: ${i}`).toStrictEqual(m);
 
 		// Test malformed ciphertext.
-		let badC = new Uint8Array(ciphertext);
+		const badC = new Uint8Array(ciphertext);
 		badC[i] ^= 0x23;
-		assert.throws(function() {
-			let foo = aead.decrypt(nonce, badC, a); // eslint-disable-line no-unused-vars
-		}, deoxysii.ErrOpen);
+		expect(() => {
+			aead.decrypt(nonce, badC, a);
+		}).toThrow(ErrOpen);
 
 		// Test malformed AD.
-		if (i == 0)
-			continue;
+		if (i === 0) continue;
 
-		let badA = new Uint8Array(a);
-		badA[i-1] ^= 0x23;
-		assert.throws(function() {
-			let foo = aead.decrypt(nonce, ciphertext, badA); // eslint-disable-line no-unused-vars
-		}, deoxysii.ErrOpen);
+		const badA = new Uint8Array(a);
+		badA[i - 1] ^= 0x23;
+		expect(() => {
+			aead.decrypt(nonce, ciphertext, badA);
+		}).toThrow(ErrOpen);
 	}
-}
+}, 5000);
 
-/** @param {boolean} useUnsafeVartime */
-function testVectorsOfficial(useUnsafeVartime) {
-	const vectors = require('./TestVectors.json');
+test("ct32: should match official test vectors", () => {
+	const vectors = require("../test/TestVectors.json");
 
 	for (let i = 0; i < vectors.length; i++) {
 		const vector = vectors[i];
 
-		let key = new Uint8Array(Buffer.from(vector.Key, 'hex'));
-		let nonce = new Uint8Array(Buffer.from(vector.Nonce, 'hex'));
-		let sealed = new Uint8Array(Buffer.from(vector.Sealed, 'hex'));
-		let associatedData = vector.AssociatedData != null ? new Uint8Array(Buffer.from(vector.AssociatedData, 'hex')) : null
-		let message = vector.Message != null ? new Uint8Array(Buffer.from(vector.Message, 'hex')) : null
+		const key = new Uint8Array(Buffer.from(vector.Key, "hex"));
+		const nonce = new Uint8Array(Buffer.from(vector.Nonce, "hex"));
+		const sealed = new Uint8Array(Buffer.from(vector.Sealed, "hex"));
+		const associatedData =
+			vector.AssociatedData != null
+				? new Uint8Array(Buffer.from(vector.AssociatedData, "hex"))
+				: null;
+		const message =
+			vector.Message != null
+				? new Uint8Array(Buffer.from(vector.Message, "hex"))
+				: null;
 
-		let aead = new deoxysii.AEAD(key, useUnsafeVartime);
+		const aead = new AEAD(key);
 
-		let ciphertext = aead.encrypt(nonce, message, associatedData);
-		assert.deepEqual(ciphertext, sealed, 'Ciphertext: ' + vector.Name);
+		const ciphertext = aead.encrypt(nonce, message, associatedData);
+		expect(ciphertext, `Ciphertext: ${vector.Name}`).toStrictEqual(sealed);
 	}
-}
+});
 
-describe('AEAD', function() {
-	it('should throw on invalid key size', function() {
-		assert.throws(function() {
-			let foo = new deoxysii.AEAD(new Uint8Array(10)); // eslint-disable-line no-unused-vars
-		}, deoxysii.ErrKeySize);
-	});
+test("parameter semantics", () => {
+	const vectors = require("../test/Deoxys-II-256-128.json");
 
-	it('ct32: should match unofficial test vectors', function() {
-		this.timeout(5000);
-		testVectorsUnofficial(false);
-	});
-	it('vartime: should match unofficial test vectors', function() {
-		this.timeout(5000);
-		testVectorsUnofficial(true);
-	});
+	const key = new Uint8Array(Buffer.from(vectors.Key, "base64"));
+	const nonce = new Uint8Array(Buffer.from(vectors.Nonce, "base64"));
+	const aad = new Uint8Array(Buffer.from(vectors.AADData, "base64"));
+	const msg = new Uint8Array(Buffer.from(vectors.MsgData, "base64"));
 
-	it('ct32: should match official test vectors', function() {
-		testVectorsOfficial(false);
-	});
-	it('vartime: should match official test vectors', function() {
-		testVectorsOfficial(true);
-	});
+	const aead = new AEAD(key);
+
+	// encrypt with wrong nonce length
+	expect(() => aead.encrypt(nonce)).not.toThrow();
+	expect(() => aead.encrypt(nonce.subarray(0, NonceSize - 1))).toThrow(
+		ErrNonceSize,
+	);
+
+	// decrypt with wrong nonce length
+	const ciphertext = aead.encrypt(nonce, msg, aad);
+	expect(() =>
+		aead.decrypt(nonce.subarray(0, NonceSize - 1), ciphertext, aad),
+	).toThrow(ErrNonceSize);
+	expect(aead.decrypt(nonce, ciphertext, aad)).toStrictEqual(msg);
+
+	// more variations of decrypt
+	expect(() => aead.decrypt(nonce, ciphertext, aad)).not.toThrow();
+	expect(() =>
+		aead.decrypt(nonce, ciphertext.subarray(0, TagSize), aad),
+	).toThrow(ErrOpen);
+	expect(() =>
+		aead.decrypt(nonce, ciphertext.subarray(0, TagSize - 1), aad),
+	).toThrow(ErrOpen);
+	expect(() => aead.decrypt(nonce, ciphertext)).toThrow(ErrOpen);
+	expect(() =>
+		aead.decrypt(nonce.subarray(0, NonceSize - 1), ciphertext, aad),
+	).toThrow(ErrNonceSize);
 });
